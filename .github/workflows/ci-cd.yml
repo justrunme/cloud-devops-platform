@@ -46,15 +46,13 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Run Trivy Vulnerability Scanner in Cluster
-        uses: aquasecurity/trivy-action@v0.2.1
-        with:
-          scan-type: 'cluster'
-          hide-progress: false
-          exit-code: '0'
-          ignore-unfixed: true
-          vuln-type: 'os,library'
-          severity: 'CRITICAL,HIGH'
+      - name: Install Trivy
+        run: |
+          wget https://github.com/aquasecurity/trivy/releases/download/v0.52.2/trivy_0.52.2_Linux-64bit.deb
+          sudo dpkg -i trivy_0.52.2_Linux-64bit.deb
+
+      - name: Run Trivy Vulnerability Scan in Cluster
+        run: trivy k8s --report summary cluster
 
       - name: Run kube-bench
         run: |
