@@ -16,11 +16,11 @@ terraform {
 }
 
 resource "kind_cluster" "default" {
-  name = "cloud-devops-platform"
+  name           = "cloud-devops-platform"
   wait_for_ready = true
 
   kind_config {
-    kind       = "Cluster"
+    kind        = "Cluster"
     api_version = "kind.x-k8s.io/v1alpha4"
 
     node {
