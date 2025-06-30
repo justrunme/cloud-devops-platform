@@ -47,7 +47,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Run Trivy Vulnerability Scanner in Cluster
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@v0.2.1
         with:
           scan-type: 'cluster'
           hide-progress: false
