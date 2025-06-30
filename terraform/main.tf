@@ -53,8 +53,17 @@ provider "helm" {
   }
 }
 
+resource "null_resource" "kind_ready" {
+  depends_on = [
+    kind_cluster.default
+  ]
+}
+
 # 1. Install ArgoCD
 resource "helm_release" "argocd" {
+  depends_on = [
+    null_resource.kind_ready
+  ]
   name       = "argocd"
   repository = "https://argoproj.github.io/argo-helm"
   chart      = "argo-cd"
@@ -71,6 +80,9 @@ resource "helm_release" "argocd" {
 
 # 2. Install Prometheus
 resource "helm_release" "prometheus" {
+  depends_on = [
+    null_resource.kind_ready
+  ]
   name       = "prometheus"
   repository = "https://prometheus-community.github.io/helm-charts"
   chart      = "prometheus"
@@ -86,6 +98,9 @@ resource "helm_release" "prometheus" {
 
 # 3. Install Grafana
 resource "helm_release" "grafana" {
+  depends_on = [
+    null_resource.kind_ready
+  ]
   name       = "grafana"
   repository = "https://grafana.github.io/helm-charts"
   chart      = "grafana"
@@ -101,6 +116,9 @@ resource "helm_release" "grafana" {
 
 # 4. Create Grafana Dashboards ConfigMap
 resource "kubernetes_config_map" "grafana_dashboards" {
+  depends_on = [
+    null_resource.kind_ready
+  ]
   metadata {
     name      = "grafana-dashboards"
     namespace = "monitoring"
