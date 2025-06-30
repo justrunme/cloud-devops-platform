@@ -53,6 +53,7 @@ jobs:
           mkdir -p ~/.kube
           echo "$KUBECONFIG_BASE64" | base64 --decode > ~/.kube/config
           chmod 600 ~/.kube/config
+          kubectl config get-contexts
           kubectl config use-context minikube
 
       - name: Install Trivy
