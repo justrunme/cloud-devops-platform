@@ -53,6 +53,9 @@ jobs:
           mkdir -p ~/.kube
           echo "$KUBECONFIG_BASE64" | base64 --decode > ~/.kube/config
           chmod 600 ~/.kube/config
+          echo "--- Kubeconfig Content (masked) ---"
+          sed -E 's/(client-certificate-data|client-key-data|token): ".*"/\1: "[MASKED]"/g' ~/.kube/config
+          echo "--- End Kubeconfig Content ---"
           kubectl config get-contexts
           kubectl config use-context minikube
 
