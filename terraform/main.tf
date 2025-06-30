@@ -50,7 +50,7 @@ resource "kind_cluster" "default" {
 
 resource "local_file" "kubeconfig" {
   depends_on = [kind_cluster.default]
-  content    = kind_cluster.default.kubeconfig_raw
+  content    = kind_cluster.default.kubeconfig
   filename   = "${path.module}/kubeconfig"
 }
 
