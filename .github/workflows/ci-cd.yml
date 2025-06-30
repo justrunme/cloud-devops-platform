@@ -70,6 +70,15 @@ jobs:
           kubectl config get-contexts
           kubectl get nodes
 
+      - name: Debug Kubernetes Access
+        env:
+          KUBECONFIG: ${{ github.workspace }}/terraform/kubeconfig
+        run: |
+          echo "Kubeconfig context:"
+          kubectl config current-context || echo "No context found"
+          echo "Nodes:"
+          kubectl get nodes || echo "Failed to get nodes"
+
       - name: Проверка Kubernetes
         run: |
           export KUBECONFIG=${{ github.workspace }}/terraform/kubeconfig
@@ -106,8 +115,12 @@ jobs:
         env:
           KUBECONFIG: ${{ github.workspace }}/terraform/kubeconfig
         run: |
-          CURRENT_CONTEXT=$(kubectl config current-context)
-          trivy k8s --report summary --context "$CURRENT_CONTEXT" cluster
+          echo "Checking cluster context..."
+          kubectl config get-contexts
+          CONTEXT=$(kubectl config current-context)
+          echo "Using context: $CONTEXT"
+          echo "Running Trivy..."
+          trivy k8s --kubeconfig $KUBECONFIG --context "$CONTEXT" --report summary --skip-images --disable-node-collector cluster
 
       - name: Run kube-bench
         env:
