@@ -70,6 +70,12 @@ jobs:
           kubectl config get-contexts
           kubectl get nodes
 
+      - name: Проверка Kubernetes
+        run: |
+          export KUBECONFIG=${{ github.workspace }}/terraform/kubeconfig
+          kubectl get nodes
+          kubectl get pods -A
+
       - name: Terraform Apply (install ArgoCD only)
         run: terraform apply -auto-approve -target=helm_release.argocd
         working-directory: ./terraform
@@ -101,7 +107,7 @@ jobs:
           KUBECONFIG: ${{ github.workspace }}/terraform/kubeconfig
         run: |
           CURRENT_CONTEXT=$(kubectl config current-context)
-          trivy k8s --report summary --context $CURRENT_CONTEXT cluster
+          trivy k8s --report summary --context "$CURRENT_CONTEXT" cluster
 
       - name: Run kube-bench
         env:
