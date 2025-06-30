@@ -120,16 +120,7 @@ jobs:
           wget https://github.com/aquasecurity/trivy/releases/download/v0.52.2/trivy_0.52.2_Linux-64bit.deb
           sudo dpkg -i trivy_0.52.2_Linux-64bit.deb
 
-      - name: Run Trivy Vulnerability Scan in Cluster
-        env:
-          KUBECONFIG: ${{ github.workspace }}/terraform/kubeconfig
-        run: |
-          echo "Checking cluster context..."
-          kubectl config get-contexts
-          CONTEXT=$(kubectl config current-context)
-          echo "Using context: $CONTEXT"
-          echo "Running Trivy..."
-          trivy k8s --kubeconfig $KUBECONFIG --context "$CONTEXT" --report summary --skip-images --disable-node-collector cluster
+      - name: Run Trivy Vulnerability Scan in Cluster        env:          KUBECONFIG: ${{ github.workspace }}/terraform/kubeconfig        run: |          echo " Running Trivy Kubernetes scan..."          trivy k8s --kubeconfig "$KUBECONFIG" --report summary --skip-images --disable-node-collector cluster
 
       - name: Run kube-bench
         env:
