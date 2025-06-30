@@ -70,7 +70,22 @@ jobs:
           kubectl config get-contexts
           kubectl get nodes
 
-      - name: Terraform Apply K8s Resources
+      - name: Terraform Apply (install ArgoCD only)
+        run: terraform apply -auto-approve -target=helm_release.argocd
+        working-directory: ./terraform
+        env:
+          KUBECONFIG: ${{ github.workspace }}/terraform/kubeconfig
+
+      - name: Wait for ArgoCD CRDs to be available
+        run: |
+          export KUBECONFIG=${{ github.workspace }}/terraform/kubeconfig
+          for i in {1..30}; do
+            kubectl get crd applications.argoproj.io && break
+            echo "Waiting for Application CRD..."
+            sleep 5
+          done
+
+      - name: Terraform Apply full (Application and monitoring)
         run: terraform apply -auto-approve
         working-directory: ./terraform
         env:

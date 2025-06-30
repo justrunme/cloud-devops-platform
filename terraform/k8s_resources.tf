@@ -61,9 +61,6 @@ resource "kubernetes_config_map" "grafana_dashboards" {
 
 # 5. Create ArgoCD Application for the demo app
 resource "kubernetes_manifest" "argocd_app" {
-  depends_on = [
-    helm_release.argocd
-  ]
   manifest = {
     "apiVersion" = "argoproj.io/v1alpha1"
     "kind"       = "Application"
