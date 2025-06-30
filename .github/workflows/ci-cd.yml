@@ -99,7 +99,9 @@ jobs:
       - name: Run Trivy Vulnerability Scan in Cluster
         env:
           KUBECONFIG: ${{ github.workspace }}/terraform/kubeconfig
-        run: trivy k8s --report summary cluster
+        run: |
+          CURRENT_CONTEXT=$(kubectl config current-context)
+          trivy k8s --report summary --context $CURRENT_CONTEXT cluster
 
       - name: Run kube-bench
         env:
