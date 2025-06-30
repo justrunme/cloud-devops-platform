@@ -1,0 +1,73 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  validate-and-format:
+    name: Validate and Format
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.5.0 # Or a version that suits your needs
+
+      - name: Terraform Init
+        id: init
+        run: terraform init
+        working-directory: ./terraform
+
+      - name: Terraform Format Check
+        id: fmt
+        run: terraform fmt -check
+        working-directory: ./terraform
+
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate
+        working-directory: ./terraform
+
+  security-scans:
+    name: Security Scans
+    runs-on: ubuntu-latest
+    needs: validate-and-format
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Run Trivy Vulnerability Scanner in Cluster
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'cluster'
+          hide-progress: false
+          exit-code: '0'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Run kube-bench
+        run: |
+          kubectl apply -f security/kube-bench-config.yaml
+          kubectl wait --for=condition=complete job/kube-bench
+          kubectl logs job/kube-bench > kube-bench-results.txt
+          cat kube-bench-results.txt
+
+      - name: Install Kubescape
+        run: | 
+          curl -s https://raw.githubusercontent.com/kubescape/kubescape/master/install.sh | /bin/bash
+
+      - name: Run Kubescape Scan
+        run: |
+          kubescape scan --format pretty --output SECURITY-REPORT.md
+          cat SECURITY-REPORT.md
