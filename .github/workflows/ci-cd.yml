@@ -52,7 +52,7 @@ jobs:
           sudo dpkg -i trivy_0.52.2_Linux-64bit.deb
 
       - name: Run Trivy Vulnerability Scan in Cluster
-        run: trivy k8s --kubeconfig ~/.kube/config --context minikube --report summary cluster
+        run: trivy k8s --kubeconfig ~/.kube/config --report summary cluster
 
       - name: Run kube-bench
         run: |
