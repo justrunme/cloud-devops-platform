@@ -56,16 +56,22 @@ jobs:
         run: terraform init
         working-directory: ./terraform
 
-      - name: Terraform Apply (Create Kind Cluster and Deploy Apps)
-        id: apply_security
+      - name: Terraform Apply (create kind cluster & kubeconfig)
         run: terraform apply -auto-approve
         working-directory: ./terraform
-        env:
-          KUBECONFIG: ${{ github.workspace }}/terraform/kubeconfig
+
+      - name: Verify Kubeconfig Exists
+        run: |
+          ls -lah ./terraform
+          cat ./terraform/kubeconfig || echo "no kubeconfig found"
+
+      - name: Debug Kubernetes Context
+        run: |
+          export KUBECONFIG=${{ github.workspace }}/terraform/kubeconfig
+          kubectl config get-contexts
+          kubectl get nodes
 
       - name: Install Trivy
-        env:
-          KUBECONFIG: ${{ github.workspace }}/terraform/kubeconfig
         run: |
           wget https://github.com/aquasecurity/trivy/releases/download/v0.52.2/trivy_0.52.2_Linux-64bit.deb
           sudo dpkg -i trivy_0.52.2_Linux-64bit.deb
@@ -85,8 +91,6 @@ jobs:
           cat kube-bench-results.txt
 
       - name: Install Kubescape
-        env:
-          KUBECONFIG: ${{ github.workspace }}/terraform/kubeconfig
         run: | 
           curl -s https://raw.githubusercontent.com/kubescape/kubescape/master/install.sh | /bin/bash
 
