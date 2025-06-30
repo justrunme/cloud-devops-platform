@@ -129,8 +129,7 @@ jobs:
             --kubeconfig "$KUBECONFIG" \
             --report summary \
             --skip-images \
-            --disable-node-collector \
-            cluster
+            --disable-node-collector
 
       - name: Run kube-bench
         env:
