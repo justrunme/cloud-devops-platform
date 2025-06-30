@@ -118,21 +118,21 @@ cloud-devops-platform/
 
 ## ✨ Key Improvements & Learnings
 
-During the development of this project, we addressed several complex challenges and implemented robust solutions:
+During the development of this project, I addressed several complex challenges and implemented robust solutions:
 
-*   **Robust CI/CD with Kind:** Transitioned from local Minikube to a dedicated Kind cluster within GitHub Actions for isolated and consistent testing environments. This involved:
-    *   **Two-Phase Terraform Apply:** Implemented a two-step `terraform apply` process to ensure the Kind cluster is fully provisioned and its `kubeconfig` is available before deploying Kubernetes-dependent resources. This resolves circular dependency issues.
-    *   **Dynamic Kubeconfig Management:** Utilized `local_file` resource in Terraform to generate and manage the `kubeconfig` file for the Kind cluster, making it accessible to all Kubernetes-related tools in the CI/CD pipeline.
-    *   **Explicit Dependencies:** Added explicit `depends_on` to ensure correct ordering of resource creation, especially for `kubernetes_config_map` and `helm_release` resources.
+*   **Robust CI/CD with Kind:** I transitioned from local Minikube to a dedicated Kind cluster within GitHub Actions for isolated and consistent testing environments. This involved:
+    *   **Two-Phase Terraform Apply:** I implemented a two-step `terraform apply` process to ensure the Kind cluster is fully provisioned and its `kubeconfig` is available before deploying Kubernetes-dependent resources. This resolves circular dependency issues.
+    *   **Dynamic Kubeconfig Management:** I utilized `local_file` resource in Terraform to generate and manage the `kubeconfig` file for the Kind cluster, making it accessible to all Kubernetes-related tools in the CI/CD pipeline.
+    *   **Explicit Dependencies:** I added explicit `depends_on` to ensure correct ordering of resource creation, especially for `kubernetes_config_map` and `helm_release` resources.
 
-*   **Enhanced Security Scans:** Integrated comprehensive security scanning tools into the CI/CD pipeline:
-    *   **Trivy:** Configured Trivy for vulnerability scanning of the Kubernetes cluster, ensuring it correctly accesses the Kind cluster's context.
-    *   **kube-bench:** Transformed `kube-bench` deployment from a `Pod` to a `Job` to leverage Kubernetes' job completion tracking, allowing for reliable waiting and log collection in CI.
-    *   **Kubescape:** Ensured Kubescape is correctly installed and added to the system's PATH within the CI environment for accurate security posture assessment.
+*   **Enhanced Security Scans:** I integrated comprehensive security scanning tools into the CI/CD pipeline:
+    *   **Trivy:** I configured Trivy for vulnerability scanning of the Kubernetes cluster, ensuring it correctly accesses the Kind cluster's context.
+    *   **kube-bench:** I transformed `kube-bench` deployment from a `Pod` to a `Job` to leverage Kubernetes' job completion tracking, allowing for reliable waiting and log collection in CI.
+    *   **Kubescape:** I ensured Kubescape is correctly installed and added to the system's PATH within the CI environment for accurate security posture assessment.
 
-*   **Improved Debugging & Observability:** Incorporated extensive debugging steps within the GitHub Actions workflow to quickly identify and resolve issues related to Kubernetes cluster access and tool execution.
+*   **Improved Debugging & Observability:** I incorporated extensive debugging steps within the GitHub Actions workflow to quickly identify and resolve issues related to Kubernetes cluster access and tool execution.
 
-*   **Refactored Terraform Structure:** Organized Terraform configurations into logical files (`providers.tf`, `kind_cluster.tf`, `k8s_resources.tf`) to improve maintainability and adhere to best practices, resolving `Duplicate required providers configuration` errors.
+*   **Refactored Terraform Structure:** I organized Terraform configurations into logical files (`providers.tf`, `kind_cluster.tf`, `k8s_resources.tf`) to improve maintainability and adhere to best practices, resolving `Duplicate required providers configuration` errors.
 
 ---
 
