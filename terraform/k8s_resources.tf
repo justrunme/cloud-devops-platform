@@ -58,3 +58,36 @@ resource "kubernetes_config_map" "grafana_dashboards" {
     "k8s-cluster-overview.json" = file("${path.module}/../monitoring/grafana-dashboards/k8s-cluster-overview.json")
   }
 }
+
+# 5. Create ArgoCD Application for the demo app
+resource "kubernetes_manifest" "argocd_app" {
+  depends_on = [
+    helm_release.argocd
+  ]
+  manifest = {
+    "apiVersion" = "argoproj.io/v1alpha1"
+    "kind"       = "Application"
+    "metadata" = {
+      "name"      = "demo-app"
+      "namespace" = "argocd"
+    }
+    "spec" = {
+      "project" = "default"
+      "source" = {
+        "repoURL"        = "https://github.com/YOUR_USERNAME/YOUR_REPOSITORY.git" # <-- ⚠️ PLEASE REPLACE THIS
+        "targetRevision" = "HEAD"
+        "path"           = "manifests/app"
+      }
+      "destination" = {
+        "server"    = "https://kubernetes.default.svc"
+        "namespace" = "default"
+      }
+      "syncPolicy" = {
+        "automated" = {
+          "prune"    = true
+          "selfHeal" = true
+        }
+      }
+    }
+  }
+}
