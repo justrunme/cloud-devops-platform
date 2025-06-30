@@ -1,5 +1,7 @@
 # Cloud-Native GitOps Platform with ArgoCD, Terraform, Monitoring & Security
 
+[![CI/CD Pipeline](https://github.com/justrunme/cloud-devops-platform/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/justrunme/cloud-devops-platform/actions/workflows/ci-cd.yml)
+
 This project demonstrates a complete cloud-native infrastructure built from scratch using modern DevOps and DevSecOps practices. The platform is designed to be deployed locally on Minikube/Kind or in a cloud environment.
 
 ## 🌟 Overview
@@ -20,12 +22,16 @@ We create a demo DevOps infrastructure that includes:
 cloud-devops-platform/
 ├── README.md
 ├── terraform/
-│   └── main.tf                # Cluster + Helm charts + GitOps
+│   ├── providers.tf             # Terraform providers configuration
+│   ├── kind_cluster.tf          # Kind cluster definition and kubeconfig generation
+│   ├── k8s_resources.tf         # Kubernetes resources (ArgoCD, Prometheus, Grafana, etc.)
+│   └── argocd-values.yaml       # ArgoCD Helm chart values
 ├── manifests/
 │   └── app/                   # Example demo application
 ├── monitoring/
 │   ├── prometheus-values.yaml
-│   └── grafana-dashboards/
+│   ├── grafana-dashboards/    # Grafana dashboards
+│   └── grafana-values.yaml      # Grafana Helm chart values
 ├── security/
 │   ├── run_trivy.sh
 │   └── kube-bench-config.yaml
@@ -84,7 +90,7 @@ cloud-devops-platform/
 
 1.  **Clone the repository:**
     ```sh
-    git clone https://github.com/your-username/cloud-devops-platform.git
+    git clone https://github.com/justrunme/cloud-devops-platform.git
     cd cloud-devops-platform
     ```
 
@@ -94,10 +100,39 @@ cloud-devops-platform/
     terraform init
     ```
 
-3.  **Apply Terraform configuration:**
+3.  **Apply Terraform configuration (Two-Phase Deployment):**
+    This project uses a two-phase Terraform deployment to ensure proper ordering of Kubernetes resource creation.
+
+    **Phase 1: Create Kind Cluster and Kubeconfig**
     ```sh
-    terraform apply
+    cd terraform
+    terraform apply -auto-approve -target=kind_cluster.default -target=local_file.kubeconfig
     ```
+
+    **Phase 2: Deploy Kubernetes Resources (ArgoCD, Prometheus, Grafana, etc.)**
+    ```sh
+    terraform apply -auto-approve
+    ```
+
+---
+
+## ✨ Key Improvements & Learnings
+
+During the development of this project, we addressed several complex challenges and implemented robust solutions:
+
+*   **Robust CI/CD with Kind:** Transitioned from local Minikube to a dedicated Kind cluster within GitHub Actions for isolated and consistent testing environments. This involved:
+    *   **Two-Phase Terraform Apply:** Implemented a two-step `terraform apply` process to ensure the Kind cluster is fully provisioned and its `kubeconfig` is available before deploying Kubernetes-dependent resources. This resolves circular dependency issues.
+    *   **Dynamic Kubeconfig Management:** Utilized `local_file` resource in Terraform to generate and manage the `kubeconfig` file for the Kind cluster, making it accessible to all Kubernetes-related tools in the CI/CD pipeline.
+    *   **Explicit Dependencies:** Added explicit `depends_on` to ensure correct ordering of resource creation, especially for `kubernetes_config_map` and `helm_release` resources.
+
+*   **Enhanced Security Scans:** Integrated comprehensive security scanning tools into the CI/CD pipeline:
+    *   **Trivy:** Configured Trivy for vulnerability scanning of the Kubernetes cluster, ensuring it correctly accesses the Kind cluster's context.
+    *   **kube-bench:** Transformed `kube-bench` deployment from a `Pod` to a `Job` to leverage Kubernetes' job completion tracking, allowing for reliable waiting and log collection in CI.
+    *   **Kubescape:** Ensured Kubescape is correctly installed and added to the system's PATH within the CI environment for accurate security posture assessment.
+
+*   **Improved Debugging & Observability:** Incorporated extensive debugging steps within the GitHub Actions workflow to quickly identify and resolve issues related to Kubernetes cluster access and tool execution.
+
+*   **Refactored Terraform Structure:** Organized Terraform configurations into logical files (`providers.tf`, `kind_cluster.tf`, `k8s_resources.tf`) to improve maintainability and adhere to best practices, resolving `Duplicate required providers configuration` errors.
 
 ---
 
@@ -156,4 +191,3 @@ you need to provide your `kubeconfig` as a GitHub Secret.
               echo "$KUBECONFIG_BASE64" | base64 --decode > ~/.kube/config
               chmod 600 ~/.kube/config
     ```
-
