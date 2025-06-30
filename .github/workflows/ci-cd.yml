@@ -46,18 +46,20 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Set up Kubeconfig
-        env:
-          KUBECONFIG_BASE64: ${{ secrets.KUBECONFIG_BASE64 }}
-        run: |
-          mkdir -p ~/.kube
-          echo "$KUBECONFIG_BASE64" | base64 --decode > ~/.kube/config
-          chmod 600 ~/.kube/config
-          echo "--- Kubeconfig Content (masked) ---"
-          sed -E 's/(client-certificate-data|client-key-data|token): ".*"/\1: "[MASKED]"/g' ~/.kube/config
-          echo "--- End Kubeconfig Content ---"
-          kubectl config get-contexts
-          kubectl config use-context minikube
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.5.0 # Or a version that suits your needs
+
+      - name: Terraform Init
+        id: init_security
+        run: terraform init
+        working-directory: ./terraform
+
+      - name: Terraform Apply (Create Kind Cluster and Deploy Apps)
+        id: apply_security
+        run: terraform apply -auto-approve
+        working-directory: ./terraform
 
       - name: Install Trivy
         run: |
@@ -65,12 +67,12 @@ jobs:
           sudo dpkg -i trivy_0.52.2_Linux-64bit.deb
 
       - name: Run Trivy Vulnerability Scan in Cluster
-        run: trivy k8s --kubeconfig ~/.kube/config --report summary cluster
+        run: trivy k8s --context cloud-devops-platform --report summary cluster
 
       - name: Run kube-bench
         run: |
           kubectl apply -f security/kube-bench-config.yaml
-          kubectl wait --for=condition=complete job/kube-bench
+          kubectl wait --for=condition=complete job/kube-bench --timeout=5m
           kubectl logs job/kube-bench > kube-bench-results.txt
           cat kube-bench-results.txt
 
@@ -80,5 +82,5 @@ jobs:
 
       - name: Run Kubescape Scan
         run: |
-          kubescape scan --kubeconfig ~/.kube/config --kubecontext minikube --format pretty --output SECURITY-REPORT.md
+          kubescape scan --kubecontext cloud-devops-platform --format pretty --output SECURITY-REPORT.md
           cat SECURITY-REPORT.md
