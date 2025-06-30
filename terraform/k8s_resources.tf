@@ -1,26 +1,3 @@
-terraform {
-  required_providers {
-    kubernetes = {
-      source  = "hashicorp/kubernetes"
-      version = "~> 2.20"
-    }
-    helm = {
-      source  = "hashicorp/helm"
-      version = "~> 2.9"
-    }
-  }
-}
-
-provider "kubernetes" {
-  config_path = "${path.module}/kubeconfig"
-}
-
-provider "helm" {
-  kubernetes {
-    config_path = "${path.module}/kubeconfig"
-  }
-}
-
 # 1. Install ArgoCD
 resource "helm_release" "argocd" {
   name       = "argocd"
