@@ -51,13 +51,12 @@ jobs:
         with:
           terraform_version: 1.5.0 # Or a version that suits your needs
 
-      - name: Terraform Init
-        id: init_security
+      - name: Terraform Init (Step 1)
         run: terraform init
         working-directory: ./terraform
 
-      - name: Terraform Apply (create kind cluster & kubeconfig)
-        run: terraform apply -auto-approve
+      - name: Terraform Apply Kind Cluster
+        run: terraform apply -auto-approve -target=kind_cluster.default -target=local_file.kubeconfig
         working-directory: ./terraform
 
       - name: Verify Kubeconfig Exists
@@ -70,6 +69,12 @@ jobs:
           export KUBECONFIG=${{ github.workspace }}/terraform/kubeconfig
           kubectl config get-contexts
           kubectl get nodes
+
+      - name: Terraform Apply K8s Resources
+        run: terraform apply -auto-approve
+        working-directory: ./terraform
+        env:
+          KUBECONFIG: ${{ github.workspace }}/terraform/kubeconfig
 
       - name: Install Trivy
         run: |
