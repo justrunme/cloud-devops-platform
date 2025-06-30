@@ -46,6 +46,9 @@ resource "helm_release" "grafana" {
 
 # 4. Create Grafana Dashboards ConfigMap
 resource "kubernetes_config_map" "grafana_dashboards" {
+  depends_on = [
+    helm_release.prometheus
+  ]
   metadata {
     name      = "grafana-dashboards"
     namespace = "monitoring"
