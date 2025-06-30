@@ -120,7 +120,17 @@ jobs:
           wget https://github.com/aquasecurity/trivy/releases/download/v0.52.2/trivy_0.52.2_Linux-64bit.deb
           sudo dpkg -i trivy_0.52.2_Linux-64bit.deb
 
-      - name: Run Trivy Vulnerability Scan in Cluster        env:          KUBECONFIG: ${{ github.workspace }}/terraform/kubeconfig        run: |          echo " Running Trivy Kubernetes scan..."          trivy k8s             --kubeconfig "$KUBECONFIG"             --report summary             --skip-images             --disable-node-collector             cluster
+      - name: Run Trivy Vulnerability Scan in Cluster
+        env:
+          KUBECONFIG: ${{ github.workspace }}/terraform/kubeconfig
+        run: |
+          echo "Running Trivy Kubernetes scan..."
+          trivy k8s \
+            --kubeconfig "$KUBECONFIG" \
+            --report summary \
+            --skip-images \
+            --disable-node-collector \
+            cluster
 
       - name: Run kube-bench
         env:
@@ -139,25 +149,8 @@ jobs:
         env:
           KUBECONFIG: ${{ github.workspace }}/terraform/kubeconfig
         run: |
-          kubescape scan --kubecontext cloud-devops-platform --format pretty --output SECURITY-REPORT.md
-          cat SECURITY-REPORT.md
-
-      - name: Run kube-bench
-        env:
-          KUBECONFIG: ${{ github.workspace }}/terraform/kubeconfig
-        run: |
-          kubectl apply -f security/kube-bench-config.yaml
-          kubectl wait --for=condition=complete job/kube-bench --timeout=5m
-          kubectl logs job/kube-bench > kube-bench-results.txt
-          cat kube-bench-results.txt
-
-      - name: Install Kubescape
-        run: | 
-          curl -s https://raw.githubusercontent.com/kubescape/kubescape/master/install.sh | /bin/bash
-
-      - name: Run Kubescape Scan
-        env:
-          KUBECONFIG: ${{ github.workspace }}/terraform/kubeconfig
-        run: |
-          kubescape scan --kubecontext cloud-devops-platform --format pretty --output SECURITY-REPORT.md
+          kubescape scan \
+            --kubeconfig $KUBECONFIG \
+            --format pretty \
+            --output SECURITY-REPORT.md
           cat SECURITY-REPORT.md
