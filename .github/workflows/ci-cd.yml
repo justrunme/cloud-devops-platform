@@ -60,16 +60,24 @@ jobs:
         id: apply_security
         run: terraform apply -auto-approve
         working-directory: ./terraform
+        env:
+          KUBECONFIG: ~/.kube/config
 
       - name: Install Trivy
+        env:
+          KUBECONFIG: ~/.kube/config
         run: |
           wget https://github.com/aquasecurity/trivy/releases/download/v0.52.2/trivy_0.52.2_Linux-64bit.deb
           sudo dpkg -i trivy_0.52.2_Linux-64bit.deb
 
       - name: Run Trivy Vulnerability Scan in Cluster
-        run: trivy k8s --context cloud-devops-platform --report summary cluster
+        env:
+          KUBECONFIG: ~/.kube/config
+        run: trivy k8s --report summary cluster
 
       - name: Run kube-bench
+        env:
+          KUBECONFIG: ~/.kube/config
         run: |
           kubectl apply -f security/kube-bench-config.yaml
           kubectl wait --for=condition=complete job/kube-bench --timeout=5m
@@ -77,10 +85,14 @@ jobs:
           cat kube-bench-results.txt
 
       - name: Install Kubescape
+        env:
+          KUBECONFIG: ~/.kube/config
         run: | 
           curl -s https://raw.githubusercontent.com/kubescape/kubescape/master/install.sh | /bin/bash
 
       - name: Run Kubescape Scan
+        env:
+          KUBECONFIG: ~/.kube/config
         run: |
           kubescape scan --kubecontext cloud-devops-platform --format pretty --output SECURITY-REPORT.md
           cat SECURITY-REPORT.md
