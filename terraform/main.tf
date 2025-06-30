@@ -47,7 +47,7 @@ resource "kind_cluster" "default" {
 }
 
 resource "local_file" "kubeconfig" {
-  content  = kind_cluster.default.kubeconfig_raw
+  content  = file(kind_cluster.default.kubeconfig)
   filename = "${path.module}/kubeconfig"
 }
 
