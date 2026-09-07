@@ -2,6 +2,10 @@
 
 [![CI/CD Pipeline](https://github.com/justrunme/cloud-devops-platform/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/justrunme/cloud-devops-platform/actions/workflows/ci-cd.yml)
 
+[![Case study](https://img.shields.io/badge/case-justrunme.com-111111)](https://justrunme.com/cases/eks-platform-foundation/)
+
+Case study: [EKS Platform Foundation](https://justrunme.com/cases/eks-platform-foundation/) · [Andrey Lesnikov](https://justrunme.com/)
+
 This project demonstrates a complete cloud-native infrastructure built from scratch using modern DevOps and DevSecOps practices. The platform is designed to be deployed locally on Minikube/Kind or in a cloud environment.
 
 ## 🌟 Overview
