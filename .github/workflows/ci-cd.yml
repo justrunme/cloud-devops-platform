@@ -151,7 +151,7 @@ jobs:
           KUBECONFIG: ${{ github.workspace }}/terraform/kubeconfig
         run: |
           kubescape scan \
-            --kubeconfig $KUBECONFIG \
-            --format pretty \
+            --kubeconfig "$KUBECONFIG" \
+            --format markdown \
             --output SECURITY-REPORT.md
           cat SECURITY-REPORT.md
