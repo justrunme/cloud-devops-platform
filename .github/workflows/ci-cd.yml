@@ -148,8 +148,11 @@ jobs:
 
       - name: Install Kubescape
         run: |
-          curl -s https://raw.githubusercontent.com/kubescape/kubescape/master/install.sh | /bin/bash
-          echo "$HOME/.kubescape/bin" >> "$GITHUB_PATH"
+          set -euo pipefail
+          ver="v3.0.42"
+          curl -fsSL "https://github.com/kubescape/kubescape/releases/download/${ver}/kubescape-ubuntu-latest" -o /usr/local/bin/kubescape
+          chmod +x /usr/local/bin/kubescape
+          kubescape version
 
       - name: Run Kubescape Scan
         env:

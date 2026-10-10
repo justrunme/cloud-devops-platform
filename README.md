@@ -1,12 +1,47 @@
-# Cloud-Native GitOps Platform with Argo CD, Terraform, Monitoring & Security
+# Cloud DevOps Platform
+
+Local Kind GitOps platform foundation with Terraform, Argo CD, and monitoring.
 
 [![CI/CD Pipeline](https://github.com/justrunme/cloud-devops-platform/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/justrunme/cloud-devops-platform/actions/workflows/ci-cd.yml)
-
+[![Release](https://img.shields.io/github/v/release/justrunme/cloud-devops-platform?display_name=tag)](https://github.com/justrunme/cloud-devops-platform/releases/latest)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Case study](https://img.shields.io/badge/case-justrunme.com-111111)](https://justrunme.com/cases/eks-platform-foundation/)
 
 Case study: [EKS Platform Foundation](https://justrunme.com/cases/eks-platform-foundation/) · [Andrey Lesnikov](https://justrunme.com/)
 
-This repository provisions a local Kind Kubernetes cluster with Terraform, deploys Argo CD (GitOps), Prometheus, and Grafana, and runs security scans from GitHub Actions.
+## What it does
+
+- Provisions a Kind cluster with Terraform and deploys Argo CD, Prometheus, and Grafana via Helm
+- Syncs a demo application from `manifests/app` through an Argo CD `Application`
+- Runs CI for `terraform fmt` / `validate`, TFLint, Trivy config, plus cluster security scans
+
+## Why
+
+- Platform foundations should be reproducible IaC with GitOps delivery and baseline security gates
+- Local Kind keeps the same Terraform/Helm patterns available without a cloud account
+
+## Quickstart
+
+```bash
+cd terraform
+terraform init
+terraform apply -auto-approve -target=kind_cluster.default -target=local_file.kubeconfig
+export KUBECONFIG="$PWD/kubeconfig"
+terraform apply -auto-approve
+```
+
+## Architecture
+
+```mermaid
+flowchart TB
+  TF[terraform Kind + Helm] --> Cluster[Kind cluster]
+  Cluster --> Argo[Argo CD]
+  Cluster --> Prom[Prometheus]
+  Cluster --> Graf[Grafana]
+  Argo --> App[manifests/app]
+  CI[.github/workflows/ci-cd.yml] --> Lint[fmt validate TFLint Trivy]
+  CI --> Sec[Trivy kube-bench Kubescape]
+```
 
 ## Overview
 
@@ -140,3 +175,4 @@ See [SECURITY.md](SECURITY.md) for supported versions and private vulnerability 
 ## License
 
 See [LICENSE](LICENSE).
+
