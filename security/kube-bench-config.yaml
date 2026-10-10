@@ -5,13 +5,23 @@ metadata:
   labels:
     app: kube-bench
 spec:
+  backoffLimit: 1
   template:
+    metadata:
+      labels:
+        app: kube-bench
     spec:
       hostPID: true
+      restartPolicy: Never
       containers:
         - name: kube-bench
-          image: aquasec/kube-bench:latest
-          command: ["kube-bench", "run", "--targets=master,node", "--benchmark=cis-1.23"]
+          image: aquasec/kube-bench:v0.10.0
+          command: ["kube-bench", "run", "--targets=master,node", "--benchmark=cis-1.24"]
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              add:
+                - AUDIT_CONTROL
           volumeMounts:
             - name: var-lib-etcd
               mountPath: /var/lib/etcd
@@ -19,17 +29,8 @@ spec:
             - name: var-lib-kubelet
               mountPath: /var/lib/kubelet
               readOnly: true
-            - name: var-lib-kube-scheduler
-              mountPath: /var/lib/kube-scheduler
-              readOnly: true
-            - name: var-lib-kube-controller-manager
-              mountPath: /var/lib/kube-controller-manager
-              readOnly: true
             - name: etc-systemd
               mountPath: /etc/systemd
-              readOnly: true
-            - name: srv-kubernetes
-              mountPath: /srv/kubernetes
               readOnly: true
             - name: etc-kubernetes
               mountPath: /etc/kubernetes
@@ -37,7 +38,6 @@ spec:
             - name: usr-bin
               mountPath: /usr/local/mount-from-host/bin
               readOnly: true
-      restartPolicy: Never
       volumes:
         - name: var-lib-etcd
           hostPath:
@@ -45,18 +45,9 @@ spec:
         - name: var-lib-kubelet
           hostPath:
             path: /var/lib/kubelet
-        - name: var-lib-kube-scheduler
-          hostPath:
-            path: /var/lib/kube-scheduler
-        - name: var-lib-kube-controller-manager
-          hostPath:
-            path: /var/lib/kube-controller-manager
         - name: etc-systemd
           hostPath:
             path: /etc/systemd
-        - name: srv-kubernetes
-          hostPath:
-            path: /srv/kubernetes
         - name: etc-kubernetes
           hostPath:
             path: /etc/kubernetes
