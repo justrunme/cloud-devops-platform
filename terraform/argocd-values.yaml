@@ -1,10 +1,50 @@
 global:
   domain: argocd.local
 
+configs:
+  params:
+    server.insecure: true
+
 server:
+  replicas: 1
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      memory: 512Mi
   ingress:
     enabled: true
     ingressClassName: nginx
     hostname: argocd.local
     path: /
     pathType: Prefix
+
+controller:
+  replicas: 1
+  resources:
+    requests:
+      cpu: 50m
+      memory: 256Mi
+    limits:
+      memory: 1Gi
+
+repoServer:
+  replicas: 1
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      memory: 512Mi
+
+applicationSet:
+  replicas: 1
+
+redis:
+  resources:
+    requests:
+      cpu: 25m
+      memory: 64Mi
+    limits:
+      memory: 256Mi

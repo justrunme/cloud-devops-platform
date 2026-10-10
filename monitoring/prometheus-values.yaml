@@ -1,9 +1,37 @@
 server:
+  persistentVolume:
+    enabled: false
+  resources:
+    requests:
+      cpu: 50m
+      memory: 256Mi
+    limits:
+      memory: 1Gi
   ingress:
     enabled: true
-    ingressClassName: "nginx"
+    ingressClassName: nginx
     hosts:
       - prometheus.local
-    paths:
-      - /
-    pathType: "Prefix"
+    pathType: Prefix
+
+alertmanager:
+  enabled: false
+
+prometheus-pushgateway:
+  enabled: false
+
+prometheus-node-exporter:
+  resources:
+    requests:
+      cpu: 25m
+      memory: 32Mi
+    limits:
+      memory: 128Mi
+
+kube-state-metrics:
+  resources:
+    requests:
+      cpu: 25m
+      memory: 64Mi
+    limits:
+      memory: 256Mi

@@ -8,6 +8,8 @@ resource "helm_release" "argocd" {
 
   create_namespace = true
   skip_crds        = false
+  wait             = true
+  timeout          = 600
 
   values = [
     templatefile("${path.module}/argocd-values.yaml", {})
@@ -23,6 +25,8 @@ resource "helm_release" "prometheus" {
   version    = "29.36.1"
 
   create_namespace = true
+  wait             = true
+  timeout          = 600
 
   values = [
     templatefile("${path.module}/../monitoring/prometheus-values.yaml", {})
@@ -38,6 +42,8 @@ resource "helm_release" "grafana" {
   version    = "10.5.15"
 
   create_namespace = true
+  wait             = true
+  timeout          = 600
 
   depends_on = [
     helm_release.prometheus

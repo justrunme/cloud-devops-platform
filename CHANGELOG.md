@@ -17,6 +17,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Removed committed Terraform state, `.terraform/` provider binaries, and related artifacts
-- Updated Terraform CLI, providers (kind, kubernetes, helm, local), Kind node image (Kubernetes 1.37), and Argo CD / Prometheus / Grafana Helm chart versions
+- Updated Terraform CLI, providers (kind, kubernetes, helm, local), Kind node image to `kindest/node:v1.34.3` (compatible with kind `v0.31.0` in `tehcyx/kind` `~> 0.11`), and Argo CD / Prometheus / Grafana Helm chart versions
 - Hardened GitHub Actions workflow by removing failure-masking patterns and upgrading actions
 - Aligned README with the Kind-based stack implemented in this repository

@@ -1,7 +1,9 @@
 resource "kind_cluster" "default" {
   name           = "cloud-devops-platform"
   wait_for_ready = true
-  node_image     = "kindest/node:v1.37.0@sha256:a1ed56cfb0e7b93589bdf97c8cd566405a265939e3620fc4f5de89adff580ae5"
+  # tehcyx/kind ~> 0.11 embeds kind v0.31.0; pin a digest from that release.
+  # Prefer v1.34.x over v1.35+ for broader cgroup compatibility on CI runners.
+  node_image = "kindest/node:v1.34.3@sha256:08497ee19eace7b4b5348db5c6a1591d7752b164530a36f855cb0f2bdcbadd48"
 
   kind_config {
     kind        = "Cluster"
@@ -19,9 +21,6 @@ resource "kind_cluster" "default" {
         host_port      = 443
         protocol       = "TCP"
       }
-    }
-    node {
-      role = "worker"
     }
   }
 }
