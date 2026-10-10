@@ -2,9 +2,10 @@
 
 Local Kind GitOps platform foundation with Terraform, Argo CD, and monitoring.
 
-[![CI](https://github.com/justrunme/cloud-devops-platform/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/justrunme/cloud-devops-platform/actions/workflows/ci-cd.yml)
+[![CI/CD Pipeline](https://github.com/justrunme/cloud-devops-platform/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/justrunme/cloud-devops-platform/actions/workflows/ci-cd.yml)
 [![Release](https://img.shields.io/github/v/release/justrunme/cloud-devops-platform?display_name=tag)](https://github.com/justrunme/cloud-devops-platform/releases/latest)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Case study](https://img.shields.io/badge/case-justrunme.com-111111)](https://justrunme.com/cases/eks-platform-foundation/)
 
 Case study: [EKS Platform Foundation](https://justrunme.com/cases/eks-platform-foundation/) · [Andrey Lesnikov](https://justrunme.com/)
 
@@ -174,3 +175,4 @@ See [SECURITY.md](SECURITY.md) for supported versions and private vulnerability 
 ## License
 
 See [LICENSE](LICENSE).
+
