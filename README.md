@@ -29,6 +29,19 @@ export KUBECONFIG="$PWD/kubeconfig"
 terraform apply -auto-approve
 ```
 
+## Architecture
+
+```mermaid
+flowchart TB
+  TF[terraform Kind + Helm] --> Cluster[Kind cluster]
+  Cluster --> Argo[Argo CD]
+  Cluster --> Prom[Prometheus]
+  Cluster --> Graf[Grafana]
+  Argo --> App[manifests/app]
+  CI[.github/workflows/ci-cd.yml] --> Lint[fmt validate TFLint Trivy]
+  CI --> Sec[Trivy kube-bench Kubescape]
+```
+
 ## Overview
 
 The stack includes:
