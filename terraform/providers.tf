@@ -1,20 +1,22 @@
 terraform {
+  required_version = ">= 1.6.0, < 2.0.0"
+
   required_providers {
     kind = {
       source  = "tehcyx/kind"
-      version = "0.0.13"
+      version = "~> 0.11"
     }
     kubernetes = {
       source  = "hashicorp/kubernetes"
-      version = "~> 2.20"
+      version = "~> 3.0"
     }
     helm = {
       source  = "hashicorp/helm"
-      version = "~> 2.9"
+      version = "~> 3.0"
     }
     local = {
       source  = "hashicorp/local"
-      version = "~> 2.4"
+      version = "~> 2.5"
     }
   }
 }
@@ -26,7 +28,7 @@ provider "kubernetes" {
 }
 
 provider "helm" {
-  kubernetes {
+  kubernetes = {
     config_path = "${path.module}/kubeconfig"
   }
 }

@@ -1,11 +1,10 @@
+global:
+  domain: argocd.local
+
 server:
-  # -- Ingress configuration for the Argo CD server
   ingress:
     enabled: true
-    # -- We will use the Minikube ingress controller
-    ingressClassName: "nginx"
-    hosts:
-      - argocd.local
-    paths:
-      - /
-    pathType: "Prefix"
+    ingressClassName: nginx
+    hostname: argocd.local
+    path: /
+    pathType: Prefix

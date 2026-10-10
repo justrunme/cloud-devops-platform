@@ -1,13 +1,13 @@
-# 1. Install ArgoCD
+# 1. Install Argo CD
 resource "helm_release" "argocd" {
   name       = "argocd"
   repository = "https://argoproj.github.io/argo-helm"
   chart      = "argo-cd"
   namespace  = "argocd"
-  version    = "5.51.4"
+  version    = "10.10.2"
 
   create_namespace = true
-  skip_crds        = true # Keep this as CRDs might already exist from previous runs or be managed by ArgoCD itself
+  skip_crds        = false
 
   values = [
     templatefile("${path.module}/argocd-values.yaml", {})
@@ -20,7 +20,7 @@ resource "helm_release" "prometheus" {
   repository = "https://prometheus-community.github.io/helm-charts"
   chart      = "prometheus"
   namespace  = "monitoring"
-  version    = "25.18.0"
+  version    = "29.36.1"
 
   create_namespace = true
 
@@ -35,9 +35,13 @@ resource "helm_release" "grafana" {
   repository = "https://grafana.github.io/helm-charts"
   chart      = "grafana"
   namespace  = "monitoring"
-  version    = "7.3.11"
+  version    = "10.5.15"
 
   create_namespace = true
+
+  depends_on = [
+    helm_release.prometheus
+  ]
 
   values = [
     templatefile("${path.module}/../monitoring/grafana-values.yaml", {})
@@ -45,9 +49,9 @@ resource "helm_release" "grafana" {
 }
 
 # 4. Create Grafana Dashboards ConfigMap
-resource "kubernetes_config_map" "grafana_dashboards" {
+resource "kubernetes_config_map_v1" "grafana_dashboards" {
   depends_on = [
-    helm_release.prometheus
+    helm_release.grafana
   ]
   metadata {
     name      = "grafana-dashboards"
@@ -62,8 +66,12 @@ resource "kubernetes_config_map" "grafana_dashboards" {
   }
 }
 
-# 5. Create ArgoCD Application for the demo app
+# 5. Create Argo CD Application for the demo app
 resource "kubernetes_manifest" "argocd_app" {
+  depends_on = [
+    helm_release.argocd
+  ]
+
   manifest = {
     "apiVersion" = "argoproj.io/v1alpha1"
     "kind"       = "Application"
@@ -74,7 +82,7 @@ resource "kubernetes_manifest" "argocd_app" {
     "spec" = {
       "project" = "default"
       "source" = {
-        "repoURL"        = "https://github.com/YOUR_USERNAME/YOUR_REPOSITORY.git" # <-- ⚠️ PLEASE REPLACE THIS
+        "repoURL"        = "https://github.com/justrunme/cloud-devops-platform.git"
         "targetRevision" = "HEAD"
         "path"           = "manifests/app"
       }

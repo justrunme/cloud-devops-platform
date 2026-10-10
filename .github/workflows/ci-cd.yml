@@ -9,49 +9,72 @@ on:
       - main
 
 jobs:
-  validate-and-format:
-    name: Validate and Format
+  validate-and-lint:
+    name: Validate and Lint
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./terraform
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v7
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
+        uses: hashicorp/setup-terraform@v4
         with:
-          terraform_version: 1.5.0 # Or a version that suits your needs
+          terraform_version: 1.16.5
+          terraform_wrapper: false
 
-      - name: Terraform Init
-        id: init
-        run: terraform init
-        working-directory: ./terraform
+      - name: Setup TFLint
+        uses: terraform-linters/setup-tflint@v6
+        with:
+          tflint_version: v0.64.0
+
+      - name: Setup Trivy
+        uses: aquasecurity/setup-trivy@v0.3.1
+        with:
+          version: v0.75.0
+          cache: true
 
       - name: Terraform Format Check
-        id: fmt
-        run: terraform fmt -check
-        working-directory: ./terraform
+        run: terraform fmt -check -recursive
+
+      - name: Terraform Init
+        run: terraform init -backend=false
 
       - name: Terraform Validate
-        id: validate
         run: terraform validate
-        working-directory: ./terraform
+
+      - name: TFLint
+        run: |
+          tflint --init
+          tflint
+
+      - name: Trivy Config Policy Scan
+        working-directory: ${{ github.workspace }}
+        run: |
+          trivy config \
+            --exit-code 1 \
+            --severity HIGH,CRITICAL \
+            terraform
 
   security-scans:
     name: Security Scans
     runs-on: ubuntu-latest
-    needs: validate-and-format
+    needs: validate-and-lint
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v7
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
+        uses: hashicorp/setup-terraform@v4
         with:
-          terraform_version: 1.5.0 # Or a version that suits your needs
+          terraform_version: 1.16.5
+          terraform_wrapper: false
 
-      - name: Terraform Init (Step 1)
+      - name: Terraform Init
         run: terraform init
         working-directory: ./terraform
 
@@ -61,71 +84,53 @@ jobs:
 
       - name: Verify Kubeconfig Exists
         run: |
-          ls -lah ./terraform
-          cat ./terraform/kubeconfig || echo "no kubeconfig found"
+          test -f ./terraform/kubeconfig
+          ls -lah ./terraform/kubeconfig
 
-      - name: Debug Kubernetes Context
-        run: |
-          export KUBECONFIG=${{ github.workspace }}/terraform/kubeconfig
-          kubectl config get-contexts
-          kubectl get nodes
-
-      - name: Debug Kubernetes Access
+      - name: Verify Kubernetes Access
         env:
           KUBECONFIG: ${{ github.workspace }}/terraform/kubeconfig
         run: |
-          echo "Kubeconfig context:"
-          kubectl config current-context || echo "No context found"
-          echo "Nodes:"
-          kubectl get nodes || echo "Failed to get nodes"
-
-      - name: Проверка подключения к Kubernetes
-        env:
-          KUBECONFIG: ${{ github.workspace }}/terraform/kubeconfig
-        run: |
-          echo "Current context:"
-          kubectl config current-context || exit 1
-          echo "Cluster nodes:"
-          kubectl get nodes || exit 1
-
-      - name: Проверка Kubernetes
-        run: |
-          export KUBECONFIG=${{ github.workspace }}/terraform/kubeconfig
+          kubectl config current-context
           kubectl get nodes
           kubectl get pods -A
 
-      - name: Terraform Apply (install ArgoCD only)
+      - name: Terraform Apply Argo CD
         run: terraform apply -auto-approve -target=helm_release.argocd
         working-directory: ./terraform
         env:
           KUBECONFIG: ${{ github.workspace }}/terraform/kubeconfig
 
-      - name: Wait for ArgoCD CRDs to be available
+      - name: Wait for Argo CD CRDs
+        env:
+          KUBECONFIG: ${{ github.workspace }}/terraform/kubeconfig
         run: |
-          export KUBECONFIG=${{ github.workspace }}/terraform/kubeconfig
-          for i in {1..30}; do
-            kubectl get crd applications.argoproj.io && break
-            echo "Waiting for Application CRD..."
+          for i in {1..36}; do
+            if kubectl get crd applications.argoproj.io; then
+              exit 0
+            fi
+            echo "Waiting for Application CRD... ($i/36)"
             sleep 5
           done
+          echo "Argo CD Application CRD did not become available in time"
+          exit 1
 
-      - name: Terraform Apply full (Application and monitoring)
+      - name: Terraform Apply Full Stack
         run: terraform apply -auto-approve
         working-directory: ./terraform
         env:
           KUBECONFIG: ${{ github.workspace }}/terraform/kubeconfig
 
-      - name: Install Trivy
+      - name: Setup Trivy
         uses: aquasecurity/setup-trivy@v0.3.1
         with:
-          version: v0.74.0
+          version: v0.75.0
           cache: true
 
-      - name: Run Trivy Vulnerability Scan in Cluster
+      - name: Run Trivy Kubernetes Scan
         env:
           KUBECONFIG: ${{ github.workspace }}/terraform/kubeconfig
         run: |
-          echo "Running Trivy Kubernetes scan..."
           trivy k8s \
             --kubeconfig "$KUBECONFIG" \
             --report summary \
@@ -138,13 +143,12 @@ jobs:
         run: |
           kubectl apply -f security/kube-bench-config.yaml
           kubectl wait --for=condition=complete job/kube-bench --timeout=5m
-          kubectl logs job/kube-bench > kube-bench-results.txt
-          cat kube-bench-results.txt
+          kubectl logs job/kube-bench
 
       - name: Install Kubescape
         run: |
           curl -s https://raw.githubusercontent.com/kubescape/kubescape/master/install.sh | /bin/bash
-          echo "$HOME/.kubescape/bin" >> $GITHUB_PATH
+          echo "$HOME/.kubescape/bin" >> "$GITHUB_PATH"
 
       - name: Run Kubescape Scan
         env:

@@ -1,6 +1,7 @@
 resource "kind_cluster" "default" {
   name           = "cloud-devops-platform"
   wait_for_ready = true
+  node_image     = "kindest/node:v1.37.0@sha256:a1ed56cfb0e7b93589bdf97c8cd566405a265939e3620fc4f5de89adff580ae5"
 
   kind_config {
     kind        = "Cluster"
