@@ -6,6 +6,7 @@ Local Kind GitOps platform foundation with Terraform, Argo CD, and monitoring.
 [![Release](https://img.shields.io/github/v/release/justrunme/cloud-devops-platform?display_name=tag)](https://github.com/justrunme/cloud-devops-platform/releases/latest)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Case study](https://img.shields.io/badge/case-justrunme.com-111111)](https://justrunme.com/cases/eks-platform-foundation/)
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/justrunme/cloud-devops-platform/badge)](https://securityscorecards.dev/viewer/?uri=github.com/justrunme/cloud-devops-platform)
 
 Case study: [EKS Platform Foundation](https://justrunme.com/cases/eks-platform-foundation/) · [Andrey Lesnikov](https://justrunme.com/)
 
