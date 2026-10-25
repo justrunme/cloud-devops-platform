@@ -105,6 +105,15 @@ jobs:
         env:
           KUBECONFIG: ${{ github.workspace }}/terraform/kubeconfig
 
+      - name: Argo CD diagnostics on failure
+        if: failure()
+        env:
+          KUBECONFIG: ${{ github.workspace }}/terraform/kubeconfig
+        run: |
+          kubectl get pods -A -o wide || true
+          kubectl get events -A --sort-by=.lastTimestamp | tail -40 || true
+          kubectl -n argocd describe pods | tail -80 || true
+
       - name: Wait for Argo CD CRDs
         env:
           KUBECONFIG: ${{ github.workspace }}/terraform/kubeconfig
