@@ -42,6 +42,10 @@ applicationSet:
   replicas: 1
 
 redis:
+  # Docker Hub official image via Google's pull-through mirror: the chart default
+  # (ecr-public.aws.com) returns 429 from shared CI runners.
+  image:
+    repository: mirror.gcr.io/library/redis
   resources:
     requests:
       cpu: 25m
