@@ -10,6 +10,8 @@ Local Kind GitOps platform foundation with Terraform, Argo CD, and monitoring.
 
 Case study: [EKS Platform Foundation](https://justrunme.com/cases/eks-platform-foundation/) · [Andrey Lesnikov](https://justrunme.com/)
 
+Author: [Andrey Lesnikov](https://orcid.org/0009-0004-7583-4314), Senior DevOps & AI Platform Engineer
+
 ## What it does
 
 - Provisions a Kind cluster with Terraform and deploys Argo CD, Prometheus, and Grafana via Helm
